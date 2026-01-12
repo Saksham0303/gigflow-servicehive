@@ -14,8 +14,8 @@ connectDB();
 
 app.use(
   cors({
-    origin: true,        
-    credentials: true,   
+    origin: true,
+    credentials: true,
   })
 );
 
@@ -27,7 +27,6 @@ app.use('/api/gigs', gigsRoutes);
 app.use('/api/bids', bidsRoutes);
 
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
