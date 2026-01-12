@@ -19,26 +19,23 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      
       if (!origin) return callback(null, true);
 
       if (
         allowedOrigins.includes(origin) ||
-        origin.includes('vercel.app') ||
+        origin.endsWith('.vercel.app') ||
         origin.includes('gigflow-servicehive')
       ) {
-        callback(null, true);
-      } else {
-        callback(null, false);
+        return callback(null, true);
       }
+
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-
-app.options('*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
