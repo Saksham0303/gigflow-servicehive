@@ -13,7 +13,7 @@ connectDB();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://gigflow-servicehive-j8hbuiyvi-saksham-jains-projects-4a0a7f8e.vercel.app',
+  'http://localhost:3000',
 ];
 
 app.use(
@@ -22,10 +22,14 @@ app.use(
       
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.includes('vercel.app') ||
+        origin.includes('gigflow-servicehive')
+      ) {
         callback(null, true);
       } else {
-        callback(null, false); 
+        callback(null, false);
       }
     },
     credentials: true,
