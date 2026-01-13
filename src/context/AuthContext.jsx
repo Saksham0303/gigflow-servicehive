@@ -13,10 +13,12 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-    
-      await api.get('/auth/me');
-      setUser({ authenticated: true });
-    } catch (error) {
+      const res = await api.get('/auth/me');
+      setUser({
+        authenticated: true,
+        userId: res.data.userId, 
+      });
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -24,15 +26,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const response = await api.post('/auth/register', { name, email, password });
-    setUser({ authenticated: true, ...response.data.user });
-    return response.data;
+    const res = await api.post('/auth/register', { name, email, password });
+
+    setUser({
+      authenticated: true,
+      userId: res.data.user.id, 
+    });
+
+    return res.data;
   };
 
   const login = async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
-    setUser({ authenticated: true, ...response.data.user });
-    return response.data;
+    const res = await api.post('/auth/login', { email, password });
+
+    setUser({
+      authenticated: true,
+      userId: res.data.user.id,
+    });
+
+    return res.data;
   };
 
   const logout = async () => {

@@ -1,5 +1,4 @@
 const express = require('express');
-const authenticate = require('../middleware/auth');
 const Gig = require('../models/Gig');
 
 const router = express.Router();
@@ -17,23 +16,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', authenticate, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { title, description, budget } = req.body;
+    const { title, description, budget, ownerId } = req.body;
 
-    if (!title || !description || budget === undefined) {
+    if (!title || !description || budget === undefined || !ownerId) {
       return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    if (budget <= 0) {
-      return res.status(400).json({ message: 'Budget must be greater than 0' });
     }
 
     const gig = new Gig({
       title,
       description,
       budget,
-      ownerId: req.userId,
+      ownerId, 
     });
 
     await gig.save();

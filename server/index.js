@@ -9,31 +9,15 @@ const gigsRoutes = require('./routes/gigs');
 const bidsRoutes = require('./routes/bids');
 
 const app = express();
-connectDB();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-];
+app.set('trust proxy', 1);
+
+connectDB();
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        origin.includes('gigflow-servicehive')
-      ) {
-        return callback(null, true);
-      }
-
-      return callback(new Error('Not allowed by CORS'));
-    },
+    origin: true,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 

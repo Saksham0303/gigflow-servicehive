@@ -2,7 +2,14 @@ const jwt = require('jsonwebtoken');
 
 const authenticate = (req, res, next) => {
   try {
-    const token = req.cookies.authToken;
+    const authHeader = req.headers.authorization;
+    let token;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    } else {
+      token = req.cookies.authToken;
+    }
 
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });

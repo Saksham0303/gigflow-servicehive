@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../utils/api';
 
 const demoGigs = [
   {
@@ -11,6 +10,7 @@ const demoGigs = [
     status: 'open',
     isDemo: true,
     ownerId: { name: 'GigFlow Team' },
+    bids: []
   },
   {
     _id: 'demo-2',
@@ -20,6 +20,7 @@ const demoGigs = [
     status: 'open',
     isDemo: true,
     ownerId: { name: 'GigFlow Team' },
+    bids: []
   },
   {
     _id: 'demo-3',
@@ -29,6 +30,7 @@ const demoGigs = [
     status: 'open',
     isDemo: true,
     ownerId: { name: 'GigFlow Team' },
+    bids: []
   },
 ];
 
@@ -42,13 +44,23 @@ const Home = () => {
     fetchGigs();
   }, []);
 
-  const fetchGigs = async () => {
+  const fetchGigs = () => {
     try {
       setLoading(true);
-      const response = await api.get('/gigs');
-      const realGigs = response.data || [];
+      
+      const storedGigs = JSON.parse(localStorage.getItem('gigs') || '[]');
+      const storedBids = JSON.parse(localStorage.getItem('bids') || '[]');
 
-      setGigs([...demoGigs, ...realGigs]);
+      const gigsWithBids = storedGigs.map(gig => {
+        const gigBids = storedBids.filter(bid => bid.gigId === gig._id);
+        return {
+          ...gig,
+          bids: gigBids,
+          bidCount: gigBids.length
+        };
+      });
+
+      setGigs([...demoGigs, ...gigsWithBids]);
       setError('');
     } catch (err) {
       setError('Failed to load gigs');
@@ -86,49 +98,90 @@ const Home = () => {
           <div className="text-center text-blue-200 py-12">Loading gigs...</div>
         ) : filteredGigs.length === 0 ? (
           <div className="text-center text-blue-200 py-12">
-            No gigs found
+            No gigs found. Create one from the dashboard! 🚀
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGigs.map((gig) => (
-              <Link
-                key={gig._id}
-                to={gig.isDemo ? '#' : `/gigs/${gig._id}`}
-                className={`bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg border border-white/5 p-6 transition ${
-                  gig.isDemo
-                    ? 'cursor-default opacity-90'
-                    : 'hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-semibold text-white flex-1">
-                    {gig.title}
-                    {gig.isDemo && (
+            
+              gig.isDemo ? (
+                <div
+                  key={gig._id}
+                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg border border-white/5 p-6 transition cursor-default opacity-90"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-semibold text-white flex-1">
+                      {gig.title}
                       <span className="ml-2 text-xs px-2 py-1 bg-gray-700 rounded">
                         Demo
                       </span>
-                    )}
-                  </h2>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
-                    {gig.status}
-                  </span>
-                </div>
-
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                  {gig.description}
-                </p>
-
-                <div className="pt-4 border-t border-gray-700">
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-400">
-                      ${gig.budget}
-                    </span>
-                    <span className="text-xs text-blue-200">
-                      by {gig.ownerId?.name || 'Unknown'}
+                    </h2>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                      {gig.status}
                     </span>
                   </div>
+
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                    {gig.description}
+                  </p>
+
+                  <div className="pt-4 border-t border-gray-700">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-2xl font-bold text-blue-400">
+                        ${gig.budget}
+                      </span>
+                      <span className="text-xs text-blue-200">
+                        by {gig.ownerId?.name || gig.ownerName || 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </Link>
+              ) : (
+          
+                <Link
+                  key={gig._id}
+                  to={`/gigs/${gig._id}`}
+                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-lg border border-white/5 p-6 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 cursor-pointer block"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-semibold text-white flex-1">
+                      {gig.title}
+                    </h2>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                      {gig.status}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                    {gig.description}
+                  </p>
+
+                  <div className="pt-4 border-t border-gray-700">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-2xl font-bold text-blue-400">
+                        ${gig.budget}
+                      </span>
+                      <span className="text-xs text-blue-200">
+                        by {gig.ownerId?.name || gig.ownerName || 'Unknown'}
+                      </span>
+                    </div>
+                    
+                    {gig.bidCount !== undefined && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="flex items-center gap-1 text-sm">
+                          <span className="text-cyan-400">💼</span>
+                          <span className="text-gray-300">
+                            {gig.bidCount} {gig.bidCount === 1 ? 'Bid' : 'Bids'}
+                          </span>
+                        </div>
+                        {gig.bidCount > 0 && (
+                          <span className="text-xs text-green-400">• Active</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )
             ))}
           </div>
         )}

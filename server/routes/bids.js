@@ -53,6 +53,19 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
+router.get('/', authenticate, async (req, res) => {
+  try {
+    const bids = await Bid.find({ freelancerId: req.userId })
+      .populate('freelancerId', 'name email')
+      .populate('gigId')
+      .sort({ createdAt: -1 });
+
+    res.json(bids);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get('/:gigId', async (req, res) => {
   try {
     const bids = await Bid.find({ gigId: req.params.gigId })
